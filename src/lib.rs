@@ -65,6 +65,51 @@ impl Sha256 {
         self.total_data_processed_bytes = 0;
     }
 
+    fn compression_function(&mut self) {
+        let mut a: Wrapping<u32>;
+        let mut b: Wrapping<u32>;
+        let mut c: Wrapping<u32>;
+        let mut d: Wrapping<u32>;
+        let mut e: Wrapping<u32>;
+        let mut f: Wrapping<u32>;
+        let mut g: Wrapping<u32>;
+        let mut h: Wrapping<u32>;
+        let mut T1: Wrapping<u32>;
+        let mut T2: Wrapping<u32>;
+        let mut W : [Wrapping<u32>; 64] = [Wrapping(0u32); 64];
+
+        [a, b, c, d, e, f, g, h] = self.H;
+
+        for t in 0..64 {
+            if t <= 15 {
+                let bytes: [u8; 4] = self.M[t * 4..(t * 4) + 4].try_into().unwrap();
+                W[t] = Wrapping(u32::from_be_bytes(bytes));
+            } else {
+                W[t] = sigma1(W[t - 2]) + W[t - 7] + sigma0(W[t - 15]) + W[t - 16];
+            }
+
+            T1 = h + Sigma1(e) + Ch(e,f,g)+ K[t]+ W[t];
+            T2 = Sigma0(a) + Maj (a, b, c);
+            h = g;
+            g = f;
+            f = e;
+            e = d + T1;
+            d = c;
+            c = b;
+            b = a;
+            a = T1 + T2;
+        }
+
+        self.H[0] += a;
+        self.H[1] += b;
+        self.H[2] += c;
+        self.H[3] += d;
+        self.H[4] += e;
+        self.H[5] += f;
+        self.H[6] += g;
+        self.H[7] += h;
+    }
+
     fn update(&mut self, data: &[u8]) {
         let mut offset: usize = 0;
         while offset < data.len() {
@@ -77,49 +122,7 @@ impl Sha256 {
             offset += bytes_to_copy;
 
             if self.remaining_bytes_in_block() == 0 {
-                let mut a: Wrapping<u32>;
-                let mut b: Wrapping<u32>;
-                let mut c: Wrapping<u32>;
-                let mut d: Wrapping<u32>;
-                let mut e: Wrapping<u32>;
-                let mut f: Wrapping<u32>;
-                let mut g: Wrapping<u32>;
-                let mut h: Wrapping<u32>;
-                let mut T1: Wrapping<u32>;
-                let mut T2: Wrapping<u32>;
-                let mut W : [Wrapping<u32>; 64] = [Wrapping(0u32); 64];
-
-                [a, b, c, d, e, f, g, h] = self.H;
-
-                for t in 0..64 {
-                    if t <= 15 {
-                        let bytes: [u8; 4] = self.M[t * 4..(t * 4) + 4].try_into().unwrap();
-                        W[t] = Wrapping(u32::from_be_bytes(bytes));
-                    } else {
-                        W[t] = sigma1(W[t - 2]) + W[t - 7] + sigma0(W[t - 15]) + W[t - 16];
-                    }
-
-                    T1 = h + Sigma1(e) + Ch(e,f,g)+ K[t]+ W[t];
-                    T2 = Sigma0(a) + Maj (a, b, c);
-                    h = g;
-                    g = f;
-                    f = e;
-                    e = d + T1;
-                    d = c;
-                    c = b;
-                    b = a;
-                    a = T1 + T2;
-                }
-
-                self.H[0] += a;
-                self.H[1] += b;
-                self.H[2] += c;
-                self.H[3] += d;
-                self.H[4] += e;
-                self.H[5] += f;
-                self.H[6] += g;
-                self.H[7] += h;
-
+                self.compression_function();
                 self.current_block_length_bytes = 0;
             }
         }

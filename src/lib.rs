@@ -163,8 +163,8 @@ impl Sha256 {
     where
         T: IntoIterator<Item = &'a u8>,
     {
-        for this_byte in data {
-            self.M[self.current_block_length_bytes] = *this_byte;
+        for &this_byte in data {
+            self.M[self.current_block_length_bytes] = this_byte;
             self.current_block_length_bytes += 1;
             self.total_data_processed_bytes += 1;
             if self.remaining_bytes_in_block() == 0 {

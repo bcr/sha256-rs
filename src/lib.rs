@@ -163,7 +163,14 @@ impl Sha256 {
     where
         T: IntoIterator<Item = &'a u8>,
     {
-        for &this_byte in data {
+        self.update_other(data.into_iter().map(|x| *x));
+    }
+
+    pub fn update_other<T>(&mut self, data: T)
+    where
+        T: IntoIterator<Item = u8>,
+    {
+        for this_byte in data {
             self.M[self.current_block_length_bytes] = this_byte;
             self.current_block_length_bytes += 1;
             self.total_data_processed_bytes += 1;

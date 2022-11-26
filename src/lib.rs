@@ -118,7 +118,7 @@ impl Sha256 {
         }
     }
 
-    fn do_final(&mut self) {
+    fn do_final(&mut self) -> [u8; 32] {
         let total_data_processed_bits = self.total_data_processed_bytes * 8;
         let mut temp_buffer: [u8; 512 / 8] = [0; 512 / 8];
 
@@ -142,7 +142,18 @@ impl Sha256 {
         temp_buffer[5] = ((total_data_processed_bits >> 16) & 0x0ff) as u8;
         temp_buffer[6] = ((total_data_processed_bits >>  8) & 0x0ff) as u8;
         temp_buffer[7] = ((total_data_processed_bits      ) & 0x0ff) as u8;
-        self.update(&temp_buffer[0..8])
+        self.update(&temp_buffer[0..8]);
+
+        let mut return_value: [u8; 32] = [0; 32];
+
+        for counter in 0..8 {
+            return_value[(counter * 4) + 0] = ((self.H[counter].0 >> 24) & 0x0ff) as u8;
+            return_value[(counter * 4) + 1] = ((self.H[counter].0 >> 16) & 0x0ff) as u8;
+            return_value[(counter * 4) + 2] = ((self.H[counter].0 >>  8) & 0x0ff) as u8;
+            return_value[(counter * 4) + 3] = ((self.H[counter].0) & 0x0ff) as u8;
+        }
+
+        return_value
     }
 }
 
@@ -180,9 +191,13 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let mut result = Sha256::new();
-        result.update("abc".as_bytes());
-        result.do_final();
-        println!("{:?}", result);
+        let mut sha256 = Sha256::new();
+        sha256.update("abc".as_bytes());
+        let actual = sha256.do_final();
+        let expected: [u8; 32] = [  0xba, 0x78, 0x16, 0xbf, 0x8f, 0x01, 0xcf, 0xea,
+                                    0x41, 0x41, 0x40, 0xde, 0x5d, 0xae, 0x22, 0x23,
+                                    0xb0, 0x03, 0x61, 0xa3, 0x96, 0x17, 0x7a, 0x9c,
+                                    0xb4, 0x10, 0xff, 0x61, 0xf2, 0x00, 0x15, 0xad];
+        assert_eq!(actual, expected);
     }
 }

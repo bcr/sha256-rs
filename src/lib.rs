@@ -127,7 +127,7 @@ impl Sha256 {
         self.update(&temp_buffer[0..1]);
         temp_buffer[0] = 0;
 
-        if self.remaining_bytes_in_block() < total_data_processed_bits.len() {
+        if self.remaining_bytes_in_block() < 8 {
             self.update(&temp_buffer[0..self.remaining_bytes_in_block()]);
         }
         self.update(&temp_buffer[0..self.remaining_bytes_in_block() - total_data_processed_bits.len()]);

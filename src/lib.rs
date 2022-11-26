@@ -61,24 +61,23 @@ impl Sha256 {
         while offset < data.len() {
             let bytes_to_copy = cmp::min(self.remaining_bytes_in_block(), data.len() - offset);
 
-            &self.M[self.current_block_length_bytes..self.current_block_length_bytes + bytes_to_copy].copy_from_slice(&data[offset..(bytes_to_copy + offset)]);
+            self.M[self.current_block_length_bytes..self.current_block_length_bytes + bytes_to_copy].copy_from_slice(&data[offset..(bytes_to_copy + offset)]);
 
             self.current_block_length_bytes += bytes_to_copy;
             self.total_data_processed_bytes += bytes_to_copy;
             offset += bytes_to_copy;
 
             if self.remaining_bytes_in_block() == 0 {
-                let mut a = Wrapping(0u32);
-                let mut b = Wrapping(0u32);
-                let mut c = Wrapping(0u32);
-                let mut d = Wrapping(0u32);
-                let mut e = Wrapping(0u32);
-                let mut f = Wrapping(0u32);
-                let mut g = Wrapping(0u32);
-                let mut h = Wrapping(0u32);
-                let mut t = Wrapping(0u32);
-                let mut T1 = Wrapping(0u32);
-                let mut T2 = Wrapping(0u32);
+                let mut a: Wrapping<u32>;
+                let mut b: Wrapping<u32>;
+                let mut c: Wrapping<u32>;
+                let mut d: Wrapping<u32>;
+                let mut e: Wrapping<u32>;
+                let mut f: Wrapping<u32>;
+                let mut g: Wrapping<u32>;
+                let mut h: Wrapping<u32>;
+                let mut T1: Wrapping<u32>;
+                let mut T2: Wrapping<u32>;
                 let mut W : [Wrapping<u32>; 64] = [Wrapping(0u32); 64];
 
                 [a, b, c, d, e, f, g, h] = self.H;

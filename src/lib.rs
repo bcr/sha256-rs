@@ -114,7 +114,7 @@ impl Sha256 {
         self.total_data_processed_bytes = 0;
     }
 
-    fn compression_function(&mut self) {
+    fn process_block(&mut self) {
         let mut a: Wrapping<u32>;
         let mut b: Wrapping<u32>;
         let mut c: Wrapping<u32>;
@@ -168,7 +168,7 @@ impl Sha256 {
             self.current_block_length_bytes += 1;
             self.total_data_processed_bytes += 1;
             if self.remaining_bytes_in_block() == 0 {
-                self.compression_function();
+                self.process_block();
                 self.current_block_length_bytes = 0;
             }
         }

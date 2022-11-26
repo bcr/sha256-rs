@@ -272,14 +272,11 @@ mod tests {
         assert_eq!(actual, expected);
     }
 
-    // FIPS 180-2 §B.3, hashing the byte ’a’ 1,000,000 times (1,000 calls to update with 1,000 ’a’s apiece.)
+    // FIPS 180-2 §B.3, hashing the byte ’a’ 1,000,000 times
     #[test]
     fn test_b3() {
         let mut sha256 = Sha256::new();
-        let data = [b'a'; 1000];
-        for _ in 0..1000 {
-            sha256.update(&data);
-        }
+        sha256.update_other((0..1_000_000).map(|_| b'a'));
         let actual = sha256.do_final();
         let expected: [u8; 32] = [
             0xcd, 0xc7, 0x6e, 0x5c, 0x99, 0x14, 0xfb, 0x92, 0x81, 0xa1, 0xc7, 0xe2, 0x84, 0xd7,

@@ -57,7 +57,6 @@ impl Sha256 {
     }
 
     fn update(&mut self, data: &[u8]) {
-        println!("Update with {}", data.len());
         let mut offset: usize = 0;
         while offset < data.len() {
             let bytes_to_copy = cmp::min(self.remaining_bytes_in_block(), data.len() - offset);
@@ -69,7 +68,6 @@ impl Sha256 {
             offset += bytes_to_copy;
 
             if self.remaining_bytes_in_block() == 0 {
-                println!("{:?}", self);
                 let mut a = Wrapping(0u32);
                 let mut b = Wrapping(0u32);
                 let mut c = Wrapping(0u32);

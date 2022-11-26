@@ -1,6 +1,5 @@
 #![allow(non_snake_case)]
 
-use std::cmp;
 use std::num::Wrapping;
 use std::mem;
 
@@ -110,17 +109,11 @@ impl Sha256 {
         self.H[7] += h;
     }
 
-    fn update(&mut self, data: &[u8]) {
-        let mut offset: usize = 0;
-        while offset < data.len() {
-            let bytes_to_copy = cmp::min(self.remaining_bytes_in_block(), data.len() - offset);
-
-            self.M[self.current_block_length_bytes..self.current_block_length_bytes + bytes_to_copy].copy_from_slice(&data[offset..(bytes_to_copy + offset)]);
-
-            self.current_block_length_bytes += bytes_to_copy;
-            self.total_data_processed_bytes += bytes_to_copy;
-            offset += bytes_to_copy;
-
+    fn update<'a, T>(&mut self, data: T) where T: IntoIterator<Item = &'a u8> {
+        for this_byte in data {
+            self.M[self.current_block_length_bytes] = *this_byte;
+            self.current_block_length_bytes += 1;
+            self.total_data_processed_bytes += 1;
             if self.remaining_bytes_in_block() == 0 {
                 self.compression_function();
                 self.current_block_length_bytes = 0;

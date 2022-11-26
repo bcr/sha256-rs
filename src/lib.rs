@@ -38,24 +38,31 @@ impl Sha256 {
             total_data_processed_bytes: 0,
         };
 
-        // The current hash value, H, is set to H(0) per the values in FIPS
-        // 180-2 §5.3.2. According to that section, “These words were obtained
-        // by taking the first thirty-two bits of the fractional parts of the
-        // square roots of the first eight prime numbers.”
-        return_value.H[0] = Wrapping(0x6a09e667);
-        return_value.H[1] = Wrapping(0xbb67ae85);
-        return_value.H[2] = Wrapping(0x3c6ef372);
-        return_value.H[3] = Wrapping(0xa54ff53a);
-        return_value.H[4] = Wrapping(0x510e527f);
-        return_value.H[5] = Wrapping(0x9b05688c);
-        return_value.H[6] = Wrapping(0x1f83d9ab);
-        return_value.H[7] = Wrapping(0x5be0cd19);
+        return_value.init();
 
         return_value
     }
 
     fn remaining_bytes_in_block(&self) -> usize {
         mem::size_of_val(&self.M) - self.current_block_length_bytes
+    }
+
+    fn init(&mut self) {
+        // The current hash value, H, is set to H(0) per the values in FIPS
+        // 180-2 §5.3.2. According to that section, “These words were obtained
+        // by taking the first thirty-two bits of the fractional parts of the
+        // square roots of the first eight prime numbers.”
+        self.H[0] = Wrapping(0x6a09e667);
+        self.H[1] = Wrapping(0xbb67ae85);
+        self.H[2] = Wrapping(0x3c6ef372);
+        self.H[3] = Wrapping(0xa54ff53a);
+        self.H[4] = Wrapping(0x510e527f);
+        self.H[5] = Wrapping(0x9b05688c);
+        self.H[6] = Wrapping(0x1f83d9ab);
+        self.H[7] = Wrapping(0x5be0cd19);
+
+        self.current_block_length_bytes = 0;
+        self.total_data_processed_bytes = 0;
     }
 
     fn update(&mut self, data: &[u8]) {

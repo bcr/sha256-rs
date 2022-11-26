@@ -84,7 +84,8 @@ impl Sha256 {
 
                 for t in 0..64 {
                     if t <= 15 {
-                        W[t] = Wrapping((u32::from(self.M[t * 4]) << 24) | (u32::from(self.M[(t * 4) + 1]) << 16) | (u32::from(self.M[(t * 4) + 2]) << 8) | (u32::from(self.M[(t * 4) + 3])));
+                        let bytes: [u8; 4] = self.M[t * 4..(t * 4) + 4].try_into().unwrap();
+                        W[t] = Wrapping(u32::from_be_bytes(bytes));
                     } else {
                         W[t] = sigma1(W[t - 2]) + W[t - 7] + sigma0(W[t - 15]) + W[t - 16];
                     }
@@ -116,7 +117,7 @@ impl Sha256 {
     }
 
     fn do_final(&mut self) -> [u8; 32] {
-        let total_data_processed_bits = self.total_data_processed_bytes * 8;
+        let total_data_processed_bits = (self.total_data_processed_bytes * 8).to_be_bytes();
         let mut temp_buffer: [u8; 512 / 8] = [0; 512 / 8];
 
         // We need to jam a single 1 bit, followed by some number of 0 bits
@@ -126,28 +127,17 @@ impl Sha256 {
         self.update(&temp_buffer[0..1]);
         temp_buffer[0] = 0;
 
-        if self.remaining_bytes_in_block() < 8 {
+        if self.remaining_bytes_in_block() < total_data_processed_bits.len() {
             self.update(&temp_buffer[0..self.remaining_bytes_in_block()]);
         }
-        self.update(&temp_buffer[0..self.remaining_bytes_in_block() - 8]);
+        self.update(&temp_buffer[0..self.remaining_bytes_in_block() - total_data_processed_bits.len()]);
 
-        temp_buffer[0] = ((total_data_processed_bits >> 56) & 0x0ff) as u8;
-        temp_buffer[1] = ((total_data_processed_bits >> 48) & 0x0ff) as u8;
-        temp_buffer[2] = ((total_data_processed_bits >> 40) & 0x0ff) as u8;
-        temp_buffer[3] = ((total_data_processed_bits >> 32) & 0x0ff) as u8;
-        temp_buffer[4] = ((total_data_processed_bits >> 24) & 0x0ff) as u8;
-        temp_buffer[5] = ((total_data_processed_bits >> 16) & 0x0ff) as u8;
-        temp_buffer[6] = ((total_data_processed_bits >>  8) & 0x0ff) as u8;
-        temp_buffer[7] = ((total_data_processed_bits      ) & 0x0ff) as u8;
-        self.update(&temp_buffer[0..8]);
+        self.update(&total_data_processed_bits);
 
         let mut return_value: [u8; 32] = [0; 32];
 
         for counter in 0..8 {
-            return_value[(counter * 4) + 0] = ((self.H[counter].0 >> 24) & 0x0ff) as u8;
-            return_value[(counter * 4) + 1] = ((self.H[counter].0 >> 16) & 0x0ff) as u8;
-            return_value[(counter * 4) + 2] = ((self.H[counter].0 >>  8) & 0x0ff) as u8;
-            return_value[(counter * 4) + 3] = ((self.H[counter].0) & 0x0ff) as u8;
+            return_value[(counter * 4)..((counter * 4) + 4)].copy_from_slice(&self.H[counter].0.to_be_bytes());
         }
 
         return_value
@@ -216,7 +206,7 @@ mod tests {
     #[test]
     fn test_b3() {
         let mut sha256 = Sha256::new();
-        let data: [u8; 1000] = [b'a'; 1000];
+        let data = [b'a'; 1000];
         for _ in 0..1000 {
             sha256.update(&data);
         }

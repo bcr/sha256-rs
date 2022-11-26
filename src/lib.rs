@@ -187,8 +187,9 @@ fn Sigma1(x: Wrapping<u32>) -> Wrapping<u32> {
 mod tests {
     use super::*;
 
+    // FIPS 180-2 §B.1, hashing the string "abc"
     #[test]
-    fn it_works() {
+    fn test_b1() {
         let mut sha256 = Sha256::new();
         sha256.update("abc".as_bytes());
         let actual = sha256.do_final();

@@ -21,7 +21,7 @@ static K: [Wrapping<u32>; 64] = [ Wrapping(0x428a2f98), Wrapping(0x71374491), Wr
                         Wrapping(0x90befffa), Wrapping(0xa4506ceb), Wrapping(0xbef9a3f7), Wrapping(0xc67178f2) ];
 
 #[derive(Debug)]
-struct Sha256 {
+pub struct Sha256 {
     H: [Wrapping<u32>; 8],
     M: [u8; 512 / 8],
     current_block_length_bytes: usize,
@@ -29,7 +29,7 @@ struct Sha256 {
 }
 
 impl Sha256 {
-    fn new() -> Sha256 {
+    pub fn new() -> Sha256 {
         let mut return_value = Sha256 {
             H: [Wrapping(0u32); 8],
             M: [0; 512 / 8],
@@ -109,7 +109,7 @@ impl Sha256 {
         self.H[7] += h;
     }
 
-    fn update<'a, T>(&mut self, data: T) where T: IntoIterator<Item = &'a u8> {
+    pub fn update<'a, T>(&mut self, data: T) where T: IntoIterator<Item = &'a u8> {
         for this_byte in data {
             self.M[self.current_block_length_bytes] = *this_byte;
             self.current_block_length_bytes += 1;
@@ -121,7 +121,7 @@ impl Sha256 {
         }
     }
 
-    fn do_final(&mut self) -> [u8; 32] {
+    pub fn do_final(&mut self) -> [u8; 32] {
         let total_data_processed_bits = (self.total_data_processed_bytes * 8).to_be_bytes();
         let mut temp_buffer: [u8; 512 / 8] = [0; 512 / 8];
 

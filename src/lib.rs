@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 
+use std::io::{Read, Result};
 use std::mem;
 use std::num::Wrapping;
 
@@ -157,6 +158,26 @@ impl Sha256 {
         self.H[5] += f;
         self.H[6] += g;
         self.H[7] += h;
+    }
+
+    pub fn update_from_reader(&mut self, reader: &mut dyn Read) -> Result<usize> {
+        let mut total_bytes_read: usize = 0;
+        loop {
+            let bytes_read = reader.read(&mut self.M[self.current_block_length_bytes..])?;
+
+            if bytes_read == 0 {
+                break;
+            }
+
+            self.current_block_length_bytes += bytes_read;
+            self.total_data_processed_bytes += bytes_read;
+            total_bytes_read += bytes_read;
+            if self.remaining_bytes_in_block() == 0 {
+                self.process_block();
+                self.current_block_length_bytes = 0;
+            }
+        }
+        Ok(total_bytes_read)
     }
 
     pub fn update<'a, T>(&mut self, data: T)

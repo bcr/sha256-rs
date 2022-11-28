@@ -114,10 +114,6 @@ sha256.update("abc".as_bytes());
 
 ```rust
 sha256.update_other((0..1_000_000).map(|_| b'a'));
-sha256.update_other(io::stdin().bytes().map(|x| x.unwrap()));
 ```
-
-The `stdin` case is particularly hilarious because every byte is a `Result`
-with a potential I/O error. You shall panic and like it. Just give me my `u8`.
 
 There is more learning to do here. I am not one with the ownership.

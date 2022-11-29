@@ -46,14 +46,10 @@ impl Sha256 {
         // 180-2 §5.3.2. According to that section, “These words were obtained
         // by taking the first thirty-two bits of the fractional parts of the
         // square roots of the first eight prime numbers.”
-        self.H[0] = 0x6a09e667;
-        self.H[1] = 0xbb67ae85;
-        self.H[2] = 0x3c6ef372;
-        self.H[3] = 0xa54ff53a;
-        self.H[4] = 0x510e527f;
-        self.H[5] = 0x9b05688c;
-        self.H[6] = 0x1f83d9ab;
-        self.H[7] = 0x5be0cd19;
+        self.H = [
+            0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab,
+            0x5be0cd19,
+        ];
 
         self.current_block_length_bytes = 0;
         self.total_data_processed_bytes = 0;

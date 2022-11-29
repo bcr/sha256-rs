@@ -103,14 +103,16 @@ impl Sha256 {
             a = (Wrapping(T1) + Wrapping(T2)).0;
         }
 
-        self.H[0] = (Wrapping(self.H[0]) + Wrapping(a)).0;
-        self.H[1] = (Wrapping(self.H[1]) + Wrapping(b)).0;
-        self.H[2] = (Wrapping(self.H[2]) + Wrapping(c)).0;
-        self.H[3] = (Wrapping(self.H[3]) + Wrapping(d)).0;
-        self.H[4] = (Wrapping(self.H[4]) + Wrapping(e)).0;
-        self.H[5] = (Wrapping(self.H[5]) + Wrapping(f)).0;
-        self.H[6] = (Wrapping(self.H[6]) + Wrapping(g)).0;
-        self.H[7] = (Wrapping(self.H[7]) + Wrapping(h)).0;
+        self.H = self
+            .H
+            .iter()
+            .map(|x| Wrapping(*x))
+            .zip([a, b, c, d, e, f, g, h].iter().map(|x| Wrapping(*x)))
+            .map(|(x, y)| x + y)
+            .map(|x| x.0)
+            .collect::<Vec<u32>>()
+            .try_into()
+            .unwrap();
     }
 
     pub fn update_from_reader(&mut self, reader: &mut dyn Read) -> Result<usize> {

@@ -72,8 +72,7 @@ impl Sha256 {
 
         for t in 0..64 {
             if t <= 15 {
-                let bytes: [u8; 4] = self.M[t * 4..(t * 4) + 4].try_into().unwrap();
-                W[t] = u32::from_be_bytes(bytes);
+                W[t] = u32::from_be_bytes(self.M[t * 4..(t * 4) + 4].try_into().unwrap());
             } else {
                 W[t] = (Wrapping(sigma1(W[t - 2]))
                     + Wrapping(W[t - 7])

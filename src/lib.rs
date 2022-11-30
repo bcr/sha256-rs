@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 
 use std::io::{Read, Result};
+use std::iter::repeat;
 use std::mem;
 use std::num::Wrapping;
 
@@ -149,20 +150,17 @@ impl Sha256 {
 
     pub fn do_final(&mut self) -> [u8; 32] {
         let total_data_processed_bits = (self.total_data_processed_bytes * 8).to_be_bytes();
-        let mut temp_buffer: [u8; 512 / 8] = [0; 512 / 8];
 
         // We need to jam a single 1 bit, followed by some number of 0 bits
         // followed by 64 bits of the length (in bits) of the data that has
         // been digested (from FIPS 180-2 §5.1.1).
-        temp_buffer[0] = 0x80;
-        self.update(&temp_buffer[0..1]);
-        temp_buffer[0] = 0;
+        self.update_other([0x80u8]);
 
         if self.remaining_bytes_in_block() < 8 {
-            self.update(&temp_buffer[0..self.remaining_bytes_in_block()]);
+            self.update_other(repeat(0).take(self.remaining_bytes_in_block()));
         }
-        self.update(
-            &temp_buffer[0..self.remaining_bytes_in_block() - total_data_processed_bits.len()],
+        self.update_other(
+            repeat(0).take(self.remaining_bytes_in_block() - total_data_processed_bits.len()),
         );
 
         self.update(&total_data_processed_bits);

@@ -98,16 +98,11 @@ impl Sha256 {
             a = (Wrapping(T1) + Wrapping(T2)).0;
         }
 
-        self.H = self
-            .H
-            .iter()
-            .map(|x| Wrapping(*x))
-            .zip([a, b, c, d, e, f, g, h].iter().map(|x| Wrapping(*x)))
-            .map(|(x, y)| x + y)
-            .map(|x| x.0)
-            .collect::<Vec<u32>>()
-            .try_into()
-            .unwrap();
+        let locals = [a, b, c, d, e, f, g, h];
+
+        for counter in 0..self.H.len() {
+            self.H[counter] = (Wrapping(self.H[counter]) + Wrapping(locals[counter])).0;
+        }
     }
 
     pub fn update_from_reader(&mut self, reader: &mut dyn Read) -> Result<usize> {

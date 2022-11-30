@@ -233,7 +233,7 @@ mod tests {
     #[test]
     fn test_b3() {
         let mut sha256 = Sha256::new();
-        sha256.update_other((0..1_000_000).map(|_| b'a'));
+        sha256.update_other(repeat(b'a').take(1_000_000));
         let actual = sha256.do_final();
         let expected: [u8; 32] = [
             0xcd, 0xc7, 0x6e, 0x5c, 0x99, 0x14, 0xfb, 0x92, 0x81, 0xa1, 0xc7, 0xe2, 0x84, 0xd7,

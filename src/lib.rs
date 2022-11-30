@@ -172,14 +172,13 @@ impl Sha256 {
 
         self.update(&total_data_processed_bits);
 
-        let mut return_value: [u8; 32] = [0; 32];
+        let mut return_value = Vec::with_capacity(4 * self.H.len());
 
-        for counter in 0..8 {
-            return_value[(counter * 4)..((counter * 4) + 4)]
-                .copy_from_slice(&self.H[counter].to_be_bytes());
+        for h in self.H {
+            return_value.extend_from_slice(&h.to_be_bytes());
         }
 
-        return_value
+        return_value.try_into().unwrap()
     }
 }
 

@@ -167,13 +167,7 @@ impl Sha256 {
 
         self.update(&total_data_processed_bits);
 
-        let mut return_value = Vec::with_capacity(4 * self.H.len());
-
-        for h in self.H {
-            return_value.extend_from_slice(&h.to_be_bytes());
-        }
-
-        return_value.try_into().unwrap()
+        self.H.map(|v| v.to_be_bytes()).concat().try_into().unwrap()
     }
 }
 

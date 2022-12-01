@@ -160,10 +160,10 @@ impl Sha256 {
             self.update_other(repeat(0).take(self.remaining_bytes_in_block()));
         }
         self.update_other(
-            repeat(0).take(self.remaining_bytes_in_block() - total_data_processed_bits.len()),
+            repeat(0)
+                .take(self.remaining_bytes_in_block() - total_data_processed_bits.len())
+                .chain(total_data_processed_bits),
         );
-
-        self.update(&total_data_processed_bits);
 
         self.H.map(|v| v.to_be_bytes()).concat().try_into().unwrap()
     }

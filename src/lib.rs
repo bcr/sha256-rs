@@ -3,7 +3,6 @@
 use std::io::{Read, Result};
 use std::iter::repeat;
 use std::mem;
-use std::num::Wrapping;
 
 static K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -75,34 +74,32 @@ impl Sha256 {
             if t <= 15 {
                 W[t] = u32::from_be_bytes(self.M[t * 4..(t * 4) + 4].try_into().unwrap());
             } else {
-                W[t] = (Wrapping(sigma1(W[t - 2]))
-                    + Wrapping(W[t - 7])
-                    + Wrapping(sigma0(W[t - 15]))
-                    + Wrapping(W[t - 16]))
-                .0;
+                W[t] = sigma1(W[t - 2])
+                    .wrapping_add(W[t - 7])
+                    .wrapping_add(sigma0(W[t - 15]))
+                    .wrapping_add(W[t - 16]);
             }
 
-            T1 = (Wrapping(h)
-                + Wrapping(Sigma1(e))
-                + Wrapping(Ch(e, f, g))
-                + Wrapping(K[t])
-                + Wrapping(W[t]))
-            .0;
-            T2 = (Wrapping(Sigma0(a)) + Wrapping(Maj(a, b, c))).0;
+            T1 = h
+                .wrapping_add(Sigma1(e))
+                .wrapping_add(Ch(e, f, g))
+                .wrapping_add(K[t])
+                .wrapping_add(W[t]);
+            T2 = Sigma0(a).wrapping_add(Maj(a, b, c));
             h = g;
             g = f;
             f = e;
-            e = (Wrapping(d) + Wrapping(T1)).0;
+            e = d.wrapping_add(T1);
             d = c;
             c = b;
             b = a;
-            a = (Wrapping(T1) + Wrapping(T2)).0;
+            a = T1.wrapping_add(T2);
         }
 
         let locals = [a, b, c, d, e, f, g, h];
 
         for counter in 0..self.H.len() {
-            self.H[counter] = (Wrapping(self.H[counter]) + Wrapping(locals[counter])).0;
+            self.H[counter] = self.H[counter].wrapping_add(locals[counter]);
         }
     }
 

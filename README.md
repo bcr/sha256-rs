@@ -31,6 +31,11 @@ gets all humpty and tries to protect you. So I learned about the use of
 Yes it does. I believe I am the target audience for this functionality and I
 feel no shame in using it.
 
+As it turns out, it's even simpler -- just use the `wrapping_add` method on an
+integer. Apparently I missed that on *the exact page I cited above*:
+
+```Wrapping arithmetic can be achieved either through methods like wrapping_add, or through the Wrapping<T> type...```
+
 ### Rust Style Conventions
 
 When implementing something from a specification, I think it's important to
